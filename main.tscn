@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://77lqjvrvy543"]
+
+[ext_resource type="Script" uid="uid://c3jwx76xj8tpa" path="res://scripts/world-logic.gd" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://12a8dp3066bd" path="res://scripts/rocket-dynamics.gd" id="1_ig7tw"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_7dm0k"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ig7tw"]
+points = PackedVector3Array(-1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, 1)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_0xm2m"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_7dm0k"]
+rings = 3
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_7dm0k"]
+
+[sub_resource type="Sky" id="Sky_ig7tw"]
+sky_material = SubResource("ProceduralSkyMaterial_7dm0k")
+
+[sub_resource type="Environment" id="Environment_7dm0k"]
+background_mode = 2
+background_color = Color(0.5676225, 0.7089955, 1, 1)
+sky = SubResource("Sky_ig7tw")
+ambient_light_color = Color(0.6955032, 0.6955031, 0.6955031, 1)
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_ig7tw"]
+
+[sub_resource type="Compositor" id="Compositor_0xm2m"]
+
+[node name="Main" type="Node3D" unique_id=1314354454]
+script = ExtResource("1_0xm2m")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=933990466]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
+mesh = SubResource("PlaneMesh_7dm0k")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D" unique_id=1324326770]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D" unique_id=1683530228]
+shape = SubResource("ConvexPolygonShape3D_ig7tw")
+
+[node name="Rocket" type="RigidBody3D" parent="." unique_id=1574210833]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 1.7424215, 0)
+mass = 30.0
+script = ExtResource("1_ig7tw")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Rocket" unique_id=1195020357]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -0.29693305, 0.29693305, 0)
+shape = SubResource("CylinderShape3D_0xm2m")
+
+[node name="Camera3D" type="Camera3D" parent="Rocket" unique_id=1520774507]
+transform = Transform3D(-4.371139e-08, 0.9759129, 0.21816027, -1.0000001, -4.2658513e-08, -9.536089e-09, 0, -0.2181603, 0.97591305, 0.59386635, 0.29693305, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Rocket" unique_id=517052993]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -0.29693305, 0.29693305, 0)
+mesh = SubResource("CylinderMesh_7dm0k")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1317789062]
+environment = SubResource("Environment_7dm0k")
+camera_attributes = SubResource("CameraAttributesPractical_ig7tw")
+compositor = SubResource("Compositor_0xm2m")
