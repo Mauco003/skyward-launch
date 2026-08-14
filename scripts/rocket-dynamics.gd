@@ -11,7 +11,11 @@ enum phases{
 
 @export var thrust_force: float = 1000.0 # Force magnitude in Newtons
 var current_phase: phases = phases.READY;
+var coefficients: Coefficients;
 var is_thrusting = false;
+
+func _ready() -> void:
+	coefficients = Coefficients.new()
 
 func _physics_process(_delta: float) -> void:
 	if Input.is_action_just_pressed("launch") && \
