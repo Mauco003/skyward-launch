@@ -2,16 +2,36 @@
 
 [ext_resource type="Script" uid="uid://c3jwx76xj8tpa" path="res://scripts/world-logic.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://12a8dp3066bd" path="res://scripts/rocket-dynamics.gd" id="1_ig7tw"]
+[ext_resource type="Script" uid="uid://deq1pouximwsm" path="res://scripts/simulation_manager.gd" id="2_7mycd"]
+[ext_resource type="Script" uid="uid://bjd0riksajgls" path="res://scripts/wind.gd" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://dy4p6kio4mq8e" path="res://scripts/isa_atmosphere.gd" id="4_lquwl"]
+[ext_resource type="Script" uid="uid://cv0e2eyclt0sn" path="res://scripts/utils/draw_wind.gd" id="5_lquwl"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7mycd"]
+albedo_color = Color(0.5019608, 0.5137255, 0.3882353, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_7dm0k"]
+material = SubResource("StandardMaterial3D_7mycd")
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_ig7tw"]
 points = PackedVector3Array(-1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, 1)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_0xm2m"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5vw27"]
+transparency = 1
+albedo_color = Color(1, 1, 1, 0.39215687)
+
 [sub_resource type="CylinderMesh" id="CylinderMesh_7dm0k"]
+material = SubResource("StandardMaterial3D_5vw27")
 rings = 3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_272bh"]
+transparency = 1
+albedo_color = Color(1, 1, 1, 0.39215687)
+
+[sub_resource type="PrismMesh" id="PrismMesh_t3fcw"]
+material = SubResource("StandardMaterial3D_272bh")
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_7dm0k"]
 
@@ -23,40 +43,82 @@ background_mode = 2
 background_color = Color(0.5676225, 0.7089955, 1, 1)
 sky = SubResource("Sky_ig7tw")
 ambient_light_color = Color(0.6955032, 0.6955031, 0.6955031, 1)
+tonemap_mode = 2
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_ig7tw"]
 
 [sub_resource type="Compositor" id="Compositor_0xm2m"]
 
-[node name="Main" type="Node3D" unique_id=1314354454]
+[sub_resource type="Curve" id="Curve_lquwl"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[node name="World" type="Node3D" unique_id=1314354454]
 script = ExtResource("1_0xm2m")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=933990466]
+[node name="SimulationManager" type="Node" parent="." unique_id=1747496149]
+process_physics_priority = -1
+script = ExtResource("2_7mycd")
+
+[node name="Terrain" type="MeshInstance3D" parent="." unique_id=933990466]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
 mesh = SubResource("PlaneMesh_7dm0k")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D" unique_id=1324326770]
+[node name="StaticBody3D" type="StaticBody3D" parent="Terrain" unique_id=1324326770]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D" unique_id=1683530228]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Terrain/StaticBody3D" unique_id=1683530228]
 shape = SubResource("ConvexPolygonShape3D_ig7tw")
 
 [node name="Rocket" type="RigidBody3D" parent="." unique_id=1574210833]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0, 1.7424215, 0)
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.873404e-09, 1.0470002, 0)
 mass = 30.0
+inertia = Vector3(0.14, 21.35, 21.35)
 script = ExtResource("1_ig7tw")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Rocket" unique_id=1195020357]
-transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -0.29693305, 0.29693305, 0)
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 0, 0.20504975, 0)
 shape = SubResource("CylinderShape3D_0xm2m")
 
-[node name="Camera3D" type="Camera3D" parent="Rocket" unique_id=1520774507]
-transform = Transform3D(-4.371139e-08, 0.9759129, 0.21816027, -1.0000001, -4.2658513e-08, -9.536089e-09, 0, -0.2181603, 0.97591305, 0.59386635, 0.29693305, 0)
+[node name="ThirdPersonCamera" type="Camera3D" parent="Rocket" unique_id=1111961493]
+transform = Transform3D(-4.371139e-08, 0.92459315, 0.38095608, -1, -4.041525e-08, -1.665212e-08, 0, -0.38095608, 0.92459315, 1.8052509, -7.8910034e-08, 2.8502498)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Rocket" unique_id=517052993]
-transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -0.29693305, 0.29693305, 0)
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_7dm0k")
+
+[node name="FPVCamera" type="Camera3D" parent="Rocket/MeshInstance3D" unique_id=1520774507]
+transform = Transform3D(1, -3.467139e-15, -7.75061e-16, 3.5527133e-15, 0.975913, 0.2181603, 0, -0.21816032, 0.9759129, 0, 0.594, 0)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Rocket" unique_id=1577920828]
+transform = Transform3D(-1.730289e-09, 1, -3.7855173e-08, -0.039584395, -4.371139e-08, -0.86602545, -0.068562195, 0, 0.49999997, -0.551049, -0.52925014, 0.36915398)
+mesh = SubResource("PrismMesh_t3fcw")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="Rocket" unique_id=521620977]
+transform = Transform3D(-1.7302892e-09, 1, 3.7855177e-08, -0.0395844, -4.371138e-08, 0.86602545, 0.068562195, 0, 0.5, -0.551049, 0.5529494, 0.38473183)
+mesh = SubResource("PrismMesh_t3fcw")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="Rocket" unique_id=1783448222]
+transform = Transform3D(3.4605772e-09, 1, -3.5527137e-15, 0.0791688, -4.371138e-08, 1.1920929e-07, 1.1175871e-08, 0, -1, -0.5510491, -0.020049512, -0.6573187)
+mesh = SubResource("PrismMesh_t3fcw")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1317789062]
 environment = SubResource("Environment_7dm0k")
 camera_attributes = SubResource("CameraAttributesPractical_ig7tw")
 compositor = SubResource("Compositor_0xm2m")
+
+[node name="Wind" type="Node" parent="." unique_id=8213278]
+script = ExtResource("3_1bvp3")
+
+[node name="Atmosphere" type="Node" parent="." unique_id=48945033]
+script = ExtResource("4_lquwl")
+
+[node name="Logger" type="Node" parent="." unique_id=889554476]
+
+[node name="DebugUI" type="CanvasLayer" parent="." unique_id=1127593667]
+visible = false
+script = ExtResource("5_lquwl")
+
+[node name="Line2D" type="Line2D" parent="DebugUI" unique_id=1241668094]
+width_curve = SubResource("Curve_lquwl")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1244147951]

@@ -92,10 +92,10 @@ func get_by_idx(ialpha: int, imach: int, iphi: int, iabk: int) -> PackedFloat32A
 			  iphi*nalpha*nmach + \
 			  iabk*nalpha*nmach*nphi;
 		
-	return data.slice(idx*6, (idx+6)*6);
+	return data.slice(idx*6, (idx+1)*6);
 
-func get_coeffs(x_alpha: float, x_mach: float, x_phi: float, x_abk: float, delta_xcg:float) -> PackedFloat32Array:
-	x_phi = fposmod(x_phi, TAU)
+func get_coeffs(x_alpha: float, x_mach: float, x_phi: float, x_abk: float, delta_xcg:float) -> Array[Vector3]:
+	x_phi = wrapf(x_phi, 0, TAU);
 	
 	var alpha_int = get_idx(alpha, x_alpha, nalpha);
 	var mach_int = get_idx(mach, x_mach, nmach);
@@ -147,7 +147,7 @@ func get_coeffs(x_alpha: float, x_mach: float, x_phi: float, x_abk: float, delta
 	if n_wraps > 0:
 		var cos_d = cos(delta_phi)
 		var sin_d = sin(delta_phi)
-		
+
 		var CY = coeff[1]
 		var CN = coeff[2]
 		var Cm = coeff[4]
@@ -157,17 +157,24 @@ func get_coeffs(x_alpha: float, x_mach: float, x_phi: float, x_abk: float, delta
 		coeff[1] = cos_d * CY - sin_d * CN
 		coeff[2] = sin_d * CY + cos_d * CN
 		
-		# R' * [Cm; Cn] (Transpose matrix)
+		# R' * [Cm; Cn] (this part was already correct)
 		coeff[4] = cos_d * Cm + sin_d * Cn
 		coeff[5] = -sin_d * Cm + cos_d * Cn
 		
-	# 6. Transport static coefficients to new CG
-	
 	# coeff[3] += (d / l) * 0.0 # Cl remains unchanged
 	coeff[4] += (delta_xcg / ref_l) * coeff[2] # Cm depends on CN
 	coeff[5] += (delta_xcg / ref_l) * coeff[1] # Cn depends on CY
 	
-	return coeff
+	# Compute stability margin
+	#var cfaTot = sin(x_phi)*coeff[1] + cos(x_phi)*(-coeff[2]);
+	#var cmaTot = cos(x_phi)*coeff[4] - sin(x_phi)*coeff[5];
+	#
+	#var SM = cmaTot / cfaTot;
+	#print("SM: ", SM);
+	
+	# Return vector of force coefficients and moment coefficients
+	return [Vector3(coeff[0], coeff[1], coeff[2]), 
+		 	Vector3(coeff[3], coeff[4], coeff[5])];
 
 ## This function returns the following:
 ## - Index of the lower boundary
@@ -200,7 +207,9 @@ func get_idx(axes: PackedFloat32Array, x: float, n: int) -> Array:
 ## - Number of cycles for modular opearations. Default: 1
 func get_idx_modular(axes: PackedFloat32Array, x: float, n: int) -> Array:
 	var x_remainder = fposmod(x, axes[n-1]);
-	var n_wraps = round(x / axes[n-1]);
+	
+	# Add small offset to compensate for floating point error 
+	var n_wraps = floor(x / axes[n-1] + 1e-5);
 	
 	var output = get_idx(axes, x_remainder, n)
 	output.append(n_wraps);
