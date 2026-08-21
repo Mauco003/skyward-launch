@@ -38,5 +38,5 @@ func _ready() -> void:
 	draw_curve_line();
 
 func _process(_delta: float) -> void:
-	wind.set_altitude(rocket.position.y);
-	DebugDraw3d.vector(rocket.position, wind.velocity * 0.5, Color.CYAN, 0);
+	pass
+	#DebugDraw3d.vector(rocket.position, wind.velocity * 0.5, Color.CYAN);

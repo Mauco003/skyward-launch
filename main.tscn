@@ -1,11 +1,14 @@
 [gd_scene format=3 uid="uid://77lqjvrvy543"]
 
-[ext_resource type="Script" uid="uid://c3jwx76xj8tpa" path="res://scripts/world-logic.gd" id="1_0xm2m"]
-[ext_resource type="Script" uid="uid://12a8dp3066bd" path="res://scripts/rocket-dynamics.gd" id="1_ig7tw"]
-[ext_resource type="Script" uid="uid://deq1pouximwsm" path="res://scripts/simulation_manager.gd" id="2_7mycd"]
-[ext_resource type="Script" uid="uid://bjd0riksajgls" path="res://scripts/wind.gd" id="3_1bvp3"]
-[ext_resource type="Script" uid="uid://dy4p6kio4mq8e" path="res://scripts/isa_atmosphere.gd" id="4_lquwl"]
+[ext_resource type="Script" uid="uid://c3jwx76xj8tpa" path="res://scripts/simulation/world.gd" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://12a8dp3066bd" path="res://scripts/rocket/rocket-dynamics.gd" id="1_ig7tw"]
+[ext_resource type="Script" uid="uid://deq1pouximwsm" path="res://scripts/simulation/simulation_manager.gd" id="2_7mycd"]
+[ext_resource type="Script" uid="uid://bjd0riksajgls" path="res://scripts/simulation/wind.gd" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://dy4p6kio4mq8e" path="res://scripts/simulation/isa_atmosphere.gd" id="4_lquwl"]
 [ext_resource type="Script" uid="uid://cv0e2eyclt0sn" path="res://scripts/utils/draw_wind.gd" id="5_lquwl"]
+[ext_resource type="Script" uid="uid://b3mner3prtnwc" path="res://scripts/telemetry/telemetry.gd" id="7_272bh"]
+[ext_resource type="Script" uid="uid://d4pc8w4fbudo" path="res://scripts/telemetry/compass.gd" id="8_5vw27"]
+[ext_resource type="Theme" uid="uid://cehrckpgv4dy0" path="res://assets/themes/default.tres" id="8_kek77"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7mycd"]
 albedo_color = Color(0.5019608, 0.5137255, 0.3882353, 1)
@@ -60,6 +63,16 @@ script = ExtResource("1_0xm2m")
 process_physics_priority = -1
 script = ExtResource("2_7mycd")
 
+[node name="Wind" type="Node" parent="." unique_id=8213278]
+unique_name_in_owner = true
+script = ExtResource("3_1bvp3")
+
+[node name="Atmosphere" type="Node" parent="." unique_id=48945033]
+unique_name_in_owner = true
+script = ExtResource("4_lquwl")
+
+[node name="Logger" type="Node" parent="." unique_id=889554476]
+
 [node name="Terrain" type="MeshInstance3D" parent="." unique_id=933990466]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
 mesh = SubResource("PlaneMesh_7dm0k")
@@ -82,37 +95,29 @@ shape = SubResource("CylinderShape3D_0xm2m")
 [node name="ThirdPersonCamera" type="Camera3D" parent="Rocket" unique_id=1111961493]
 transform = Transform3D(-4.371139e-08, 0.92459315, 0.38095608, -1, -4.041525e-08, -1.665212e-08, 0, -0.38095608, 0.92459315, 1.8052509, -7.8910034e-08, 2.8502498)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Rocket" unique_id=517052993]
+[node name="Body" type="MeshInstance3D" parent="Rocket" unique_id=517052993]
 transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("CylinderMesh_7dm0k")
 
-[node name="FPVCamera" type="Camera3D" parent="Rocket/MeshInstance3D" unique_id=1520774507]
+[node name="FPVCamera" type="Camera3D" parent="Rocket/Body" unique_id=1520774507]
 transform = Transform3D(1, -3.467139e-15, -7.75061e-16, 3.5527133e-15, 0.975913, 0.2181603, 0, -0.21816032, 0.9759129, 0, 0.594, 0)
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="Rocket" unique_id=1577920828]
+[node name="Fin1" type="MeshInstance3D" parent="Rocket" unique_id=1783448222]
+transform = Transform3D(3.4605772e-09, 1, -3.5527137e-15, 0.0791688, -4.371138e-08, 1.1920929e-07, 1.1175871e-08, 0, -1, -0.5510491, -0.020049514, -0.6573187)
+mesh = SubResource("PrismMesh_t3fcw")
+
+[node name="Fin2" type="MeshInstance3D" parent="Rocket" unique_id=1577920828]
 transform = Transform3D(-1.730289e-09, 1, -3.7855173e-08, -0.039584395, -4.371139e-08, -0.86602545, -0.068562195, 0, 0.49999997, -0.551049, -0.52925014, 0.36915398)
 mesh = SubResource("PrismMesh_t3fcw")
 
-[node name="MeshInstance3D4" type="MeshInstance3D" parent="Rocket" unique_id=521620977]
+[node name="Fin3" type="MeshInstance3D" parent="Rocket" unique_id=521620977]
 transform = Transform3D(-1.7302892e-09, 1, 3.7855177e-08, -0.0395844, -4.371138e-08, 0.86602545, 0.068562195, 0, 0.5, -0.551049, 0.5529494, 0.38473183)
-mesh = SubResource("PrismMesh_t3fcw")
-
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="Rocket" unique_id=1783448222]
-transform = Transform3D(3.4605772e-09, 1, -3.5527137e-15, 0.0791688, -4.371138e-08, 1.1920929e-07, 1.1175871e-08, 0, -1, -0.5510491, -0.020049512, -0.6573187)
 mesh = SubResource("PrismMesh_t3fcw")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1317789062]
 environment = SubResource("Environment_7dm0k")
 camera_attributes = SubResource("CameraAttributesPractical_ig7tw")
 compositor = SubResource("Compositor_0xm2m")
-
-[node name="Wind" type="Node" parent="." unique_id=8213278]
-script = ExtResource("3_1bvp3")
-
-[node name="Atmosphere" type="Node" parent="." unique_id=48945033]
-script = ExtResource("4_lquwl")
-
-[node name="Logger" type="Node" parent="." unique_id=889554476]
 
 [node name="DebugUI" type="CanvasLayer" parent="." unique_id=1127593667]
 visible = false
@@ -122,3 +127,47 @@ script = ExtResource("5_lquwl")
 width_curve = SubResource("Curve_lquwl")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1244147951]
+
+[node name="MainHUD" type="MarginContainer" parent="UI" unique_id=1881571375]
+offset_right = 65.0
+offset_bottom = 87.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+
+[node name="Telemetry" type="PanelContainer" parent="UI/MainHUD" unique_id=1414675794]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("7_272bh")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/MainHUD/Telemetry" unique_id=391487433]
+layout_mode = 2
+
+[node name="Altitude" type="Label" parent="UI/MainHUD/Telemetry/VBoxContainer" unique_id=306792746]
+layout_mode = 2
+text = "ALT. "
+
+[node name="Mach" type="Label" parent="UI/MainHUD/Telemetry/VBoxContainer" unique_id=972848613]
+layout_mode = 2
+text = "MACH"
+
+[node name="Heading" type="Label" parent="UI/MainHUD/Telemetry/VBoxContainer" unique_id=1630057478]
+visible = false
+layout_mode = 2
+text = "ALT. "
+
+[node name="Phase" type="Label" parent="UI/MainHUD/Telemetry/VBoxContainer" unique_id=1416631520]
+layout_mode = 2
+text = "PHASE:"
+
+[node name="Compass" type="Panel" parent="UI" unique_id=1890477121]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 0)
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_right = 200.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme = ExtResource("8_kek77")
+script = ExtResource("8_5vw27")

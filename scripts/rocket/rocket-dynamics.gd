@@ -1,16 +1,7 @@
 extends RigidBody3D
 
-enum phases{
-	READY,
-	THRUST,
-	COASTING,
-	DROGUE,
-	MAIN,
-	LANDED
-}
-
 @export var thrust_force: float = 3000.0 # Force magnitude in Newtons
-var current_phase: phases = phases.READY;
+var current_phase: Flight.Phase = Flight.Phase.READY;
 var coefficients: Coefficients = Coefficients.new();
 var is_thrusting = false;
 
@@ -19,8 +10,14 @@ var is_thrusting = false;
 @onready var atmosphere: IsaAtmosphere = $"../Atmosphere";
 @onready var wind: Wind = $"../Wind";
 
-@onready var cameras: Array[Camera3D] = [$MeshInstance3D/FPVCamera, $ThirdPersonCamera]
+@onready var cameras: Array[Camera3D] = [$Body/FPVCamera, $ThirdPersonCamera];
 var active_camera_id = 0;
+
+@onready var telemetry = %Telemetry;
+var telemetry_data: TelemetryPacket = TelemetryPacket.new();
+
+## Telemetry data
+var mach: float = 0;
 
 func _ready() -> void:
 	pass
@@ -40,11 +37,11 @@ func _physics_process(_delta: float) -> void:
 		cameras[active_camera_id].current = true;
 	
 	if Input.is_action_just_pressed("launch") && \
-		(current_phase == phases.READY || current_phase == phases.THRUST):
+		(current_phase == Flight.Phase.READY || current_phase == Flight.Phase.THRUST):
 		
 		# Default action bound to Spacebar
 		is_thrusting = !is_thrusting;
-		#next_phase();
+		next_phase();
 		print_debug("Current phase: ", current_phase);
 
 	if is_thrusting:
@@ -62,10 +59,11 @@ func _physics_process(_delta: float) -> void:
 	var a = atmosphere.speed_of_sound;
 	
 	var velocity_magnitude = relative_velocity.length();
-	var mach = velocity_magnitude / a;
+	mach = velocity_magnitude / a;
 	
 	# Debug velocity vector
 	DebugDraw3d.vector(position, quats_to_global * relative_velocity, Color.RED)
+	DebugDraw3d.vector(position, wind.velocity * 0.5, Color.CYAN);
 
 	#print("Global velocity: ", relative_velocity);
 
@@ -103,11 +101,11 @@ func _physics_process(_delta: float) -> void:
 	# Debugging torques
 	#var torque_axibody_local = Vector3(m.x, 0.0, 0.0)
 	#var torque_transversal_local = m - torque_axibody_local
-#
+
 	## 2. Transform to GLOBAL frame for 3D world drawing
 	#var origin = global_position
 	#var basis = global_transform.basis
-#
+
 	#var torque_axibody_world = basis * torque_axibody_local
 	#var torque_transversal_world = basis * torque_transversal_local
 	#var torque_total_world = basis * m
@@ -118,9 +116,6 @@ func _physics_process(_delta: float) -> void:
 	#print("torque_axibody magnitude: ", torque_axibody.length())
 
 static func get_alpha_phi(velocity: Vector3) -> Vector2:
-	# Note: Datcom aerodynamic frame is rotated along z by PI rad
-	#  i.e: x and y are flipped
-	
 	var u := velocity.x
 	var v := velocity.y
 	var w := velocity.z
@@ -139,6 +134,14 @@ static func get_alpha_phi(velocity: Vector3) -> Vector2:
 	
 	return Vector2(alpha_tot, phi)
 
+func _process(_delta: float) -> void:
+	telemetry_data.altitude = position.y;
+	telemetry_data.mach = mach;
+	telemetry_data.phase = current_phase;
+	telemetry_data.velocity = linear_velocity;
+	
+	telemetry.update(telemetry_data);
+
 func next_phase() -> void:
-	if current_phase < phases.LANDED:
-		current_phase = (current_phase + 1) as phases;
+	if current_phase < Flight.Phase.LANDED:
+		current_phase = (current_phase + 1) as Flight.Phase;
