@@ -8,6 +8,12 @@ extends Node
 
 @onready var compass = %Compass
 
+## Rocket starting altitude. Used to calculate altitude a.m.s.l.
+@export var initial_altitude = 0;
+
+var altitude_amsl: float;
+var altitude_agl: float;
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	atmosphere.set_altitude(rocket.position.y);
@@ -15,7 +21,12 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	atmosphere.set_altitude(rocket.position.y);
+	altitude_agl = rocket.position.y;
+	altitude_amsl = altitude_agl + initial_altitude;
+	
+	# Atmosphere altitude is defined amsl to correctly compute ISA air
+	atmosphere.set_altitude(altitude_amsl);
+	# Wind altitude is defined agl
 	wind.set_altitude(rocket.position.y);
 	
 	var rocket_axis = rocket.transform.basis.x;

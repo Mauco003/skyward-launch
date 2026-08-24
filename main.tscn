@@ -9,6 +9,9 @@
 [ext_resource type="Script" uid="uid://b3mner3prtnwc" path="res://scripts/telemetry/telemetry.gd" id="7_272bh"]
 [ext_resource type="Script" uid="uid://d4pc8w4fbudo" path="res://scripts/telemetry/compass.gd" id="8_5vw27"]
 [ext_resource type="Theme" uid="uid://cehrckpgv4dy0" path="res://assets/themes/default.tres" id="8_kek77"]
+[ext_resource type="Script" uid="uid://d2yyc00tcs378" path="res://addons/zylann.hterrain/hterrain.gd" id="10_dg77c"]
+[ext_resource type="Resource" uid="uid://mtknbs8fsjb7" path="res://assets/terrain/roccaraso/data.hterrain" id="11_ycdy4"]
+[ext_resource type="Script" uid="uid://dq0ak26blyq5g" path="res://addons/zylann.hterrain/hterrain_texture_set.gd" id="12_w48qg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7mycd"]
 albedo_color = Color(0.5019608, 0.5137255, 0.3882353, 1)
@@ -56,12 +59,18 @@ tonemap_mode = 2
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
 point_count = 2
 
+[sub_resource type="Resource" id="Resource_vivmo"]
+script = ExtResource("12_w48qg")
+mode = 0
+textures = [[], []]
+
 [node name="World" type="Node3D" unique_id=1314354454]
 script = ExtResource("1_0xm2m")
 
 [node name="SimulationManager" type="Node" parent="." unique_id=1747496149]
 process_physics_priority = -1
 script = ExtResource("2_7mycd")
+initial_altitude = 1140
 
 [node name="Wind" type="Node" parent="." unique_id=8213278]
 unique_name_in_owner = true
@@ -75,6 +84,7 @@ script = ExtResource("4_lquwl")
 
 [node name="Terrain" type="MeshInstance3D" parent="." unique_id=933990466]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
+visible = false
 mesh = SubResource("PlaneMesh_7dm0k")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Terrain" unique_id=1324326770]
@@ -83,13 +93,13 @@ mesh = SubResource("PlaneMesh_7dm0k")
 shape = SubResource("ConvexPolygonShape3D_ig7tw")
 
 [node name="Rocket" type="RigidBody3D" parent="." unique_id=1574210833]
-transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.873404e-09, 1.0470002, 0)
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 8.873404e-09, 1.228488, 0)
 mass = 30.0
 inertia = Vector3(0.14, 21.35, 21.35)
 script = ExtResource("1_ig7tw")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Rocket" unique_id=1195020357]
-transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 0, 0.20504975, 0)
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CylinderShape3D_0xm2m")
 
 [node name="ThirdPersonCamera" type="Camera3D" parent="Rocket" unique_id=1111961493]
@@ -171,3 +181,27 @@ offset_bottom = 60.0
 grow_horizontal = 2
 theme = ExtResource("8_kek77")
 script = ExtResource("8_5vw27")
+
+[node name="HTerrain" type="Node3D" parent="." unique_id=2112713398]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 4500, -627.675, -3900)
+script = ExtResource("10_dg77c")
+map_scale = Vector3(3.56, 1, 3.56)
+_terrain_data = ExtResource("11_ycdy4")
+chunk_size = 32
+collision_enabled = true
+collision_layer = 1
+collision_mask = 1
+shader_type = "Classic4Lite"
+custom_shader = null
+custom_globalmap_shader = null
+texture_set = SubResource("Resource_vivmo")
+render_layers = 1
+cast_shadow = 1
+shader_params/u_ground_uv_scale = 20
+shader_params/u_depth_blending = true
+shader_params/u_triplanar = null
+shader_params/u_tile_reduction = null
+metadata/_custom_type_script = "uid://d2yyc00tcs378"
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1233839601]
+transform = Transform3D(0.7602246, 0.64966035, 0, -0.6458445, 0.75575936, 0.10822492, 0.07030944, -0.08227524, 0.99412644, 0, 0, -1377.288)
